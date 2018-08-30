@@ -3,9 +3,13 @@
 namespace App\Service;
 
 use Nexy\Slack\Client;
+use App\Helper\LoggerTrait;
 
 class SlackClient
 {
+    use LoggerTrait;
+
+    private $slack;
 
     public function __construct(Client $slack)
     {
@@ -14,6 +18,10 @@ class SlackClient
 
     public function sendMessage(string $from, string $message)
     {
+        $this->logInfo('Sending a message to slack', [
+            'message' => $message
+        ]);
+
         $slackMessage = $this->slack->createMessage()
             ->from($from)
             ->withIcon(':ghost:')
