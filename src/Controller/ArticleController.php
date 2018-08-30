@@ -9,6 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Psr\Log\LoggerInterface;
 use Twig\Environment;
 use App\Service\MarkdownHelper;
+use App\Service\SlackClient;
 
 
 class ArticleController extends AbstractController
@@ -29,8 +30,13 @@ class ArticleController extends AbstractController
      /**
      * @Route("/news/{slug}", name="article_show")
      */
-    public function show($slug, MarkdownHelper $markdownHelper)
+    public function show($slug, MarkdownHelper $markdownHelper, SlackClient $slack)
     {
+
+        if ($slug === 'khan') {
+            $slack->sendMessage('khanouille', "1 trempe les frites dans l'huile");
+        }
+
         $comments = [
             'I ate a normal rock once. It did NOT taste like bacon!',
             'Woohoo! I\'m going on an all-asteroid diet!',
