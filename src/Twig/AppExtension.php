@@ -5,18 +5,20 @@ namespace App\Twig;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 use App\Service\MarkdownHelper;
+use Psr\Container\ContainerInterface;
 use Twig\Extension\AbstractExtension;
+use Symfony\Component\DependencyInjection\ServiceSubscriberInterface;
 
-class AppExtension extends AbstractExtension
+class AppExtension extends AbstractExtension implements ServiceSubscriberInterface
 {
-    private $helper;
+    private $container;
 
-    public function __construct(MarkdownHelper $helper) {
-        $this->helper = $helper;
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
     }
 
-    public function getFilters(): array
-    {
+    public function getFilters(){
         return [
             // If your filter generates SAFE HTML, you should add a third
             // parameter: ['is_safe' => ['html']]
@@ -27,6 +29,15 @@ class AppExtension extends AbstractExtension
 
     public function processMarkdown($value)
     {
-        return $this->helper->parse($value);
+        return $this->container
+        ->get(MarkdownHelper::class)
+        ->parse($value);
+    }
+
+    public static function getSubscribedServices()
+    {
+        return [
+            MarkdownHelper::class
+        ];
     }
 }

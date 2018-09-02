@@ -7,6 +7,7 @@ use App\Entity\Article;
 use App\Service\SlackClient;
 use Psr\Log\LoggerInterface;
 use App\Service\MarkdownHelper;
+use App\Repository\ArticleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,28 +25,23 @@ class ArticleController extends AbstractController
     /**
      * @Route("/", name="app_homepage")
     */
-    public function homepage ()
+    public function homepage (ArticleRepository $repository)
     {
-        return $this->render('article/homepage.html.twig');
+        $articles = $repository->findAllPublishedOrderedByNewest([], ['publishedAt' => 'DESC']);
+
+        return $this->render('article/homepage.html.twig', [
+            'articles' => $articles
+        ]);
     }
 
      /**
      * @Route("/news/{slug}", name="article_show")
      */
-    public function show($slug, SlackClient $slack, EntityManagerInterface $em)
+    public function show(Article $article, SlackClient $slack)
     {
-
-        if ($slug === 'khan') {
+        if ($article->getSlug() === 'khan') {
             $slack->sendMessage('khanouille', "1 trempe les frites dans l'huile");
         }
-
-        $repository = $em->getRepository(Article::class);
-        /** @var Article $article */
-        $article = $repository->findOneBy(['slug' => $slug]);
-        if (!$article) {
-            throw $this->createNotFoundException(sprintf('No article found for this slug'));
-        }
-        
 
         $comments = [
             'I ate a normal rock once. It did NOT taste like bacon!',
